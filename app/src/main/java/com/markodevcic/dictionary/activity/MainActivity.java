@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
+import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -100,12 +100,24 @@ public class MainActivity extends BaseActivity {
 									.onBackpressureBuffer()
 									.subscribeOn(Schedulers.io())
 									.observeOn(AndroidSchedulers.mainThread())
-									.subscribe(new Action1<DictionaryEntry>() {
+									.subscribe(new Observer<DictionaryEntry>() {
 										@Override
-										public void call(DictionaryEntry dictionaryEntry) {
+										public void onCompleted() {
+											progressBar.setVisibility(View.GONE);
+										}
+
+										@Override
+										public void onError(Throwable e) {
+
+										}
+
+										@Override
+										public void onNext(DictionaryEntry dictionaryEntry) {
 											dictViewAdapter.addItem(dictionaryEntry);
 										}
 									});
+						} else {
+							progressBar.setVisibility(View.GONE);
 						}
 					}
 				});

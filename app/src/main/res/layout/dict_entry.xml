@@ -22,12 +22,13 @@
                 android:id="@+id/dict_entry_de_main_term"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 tools:text="Haus"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:layout_marginTop="3dp"
                 android:layout_marginStart="3dp"
                 android:id="@+id/dict_entry_de_alt_term"/>
@@ -51,13 +52,14 @@
                 android:id="@+id/dict_entry_frgn_main_term"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 tools:text="house"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:layout_marginTop="3dp"
                 android:layout_marginStart="3dp"
                 android:id="@+id/dict_entry_frgn_alt_term"/>
