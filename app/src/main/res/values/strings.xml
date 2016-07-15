@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">DE-EN Dictionary</string>
+    <string name="search_hint">just start typing here ...</string>
+</resources>
