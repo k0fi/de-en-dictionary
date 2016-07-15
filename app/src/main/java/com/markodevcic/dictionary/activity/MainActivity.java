@@ -34,7 +34,6 @@ import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subscriptions.Subscriptions;
 
-@SuppressWarnings("ConstantConditions")
 public class MainActivity extends BaseActivity {
 
 	@Inject
@@ -69,7 +68,9 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
 				searchSubject.onNext(s.toString());
-				progressBar.setVisibility(View.VISIBLE);
+				if (start > 1) {
+					progressBar.setVisibility(View.VISIBLE);
+				}
 			}
 
 			@Override
@@ -77,7 +78,7 @@ public class MainActivity extends BaseActivity {
 			}
 		});
 
-		searchSubject.asObservable().buffer(1200, TimeUnit.MILLISECONDS)
+		searchSubject.asObservable().buffer(1000, TimeUnit.MILLISECONDS)
 				.distinctUntilChanged()
 				.filter(new Func1<List<String>, Boolean>() {
 					@Override
