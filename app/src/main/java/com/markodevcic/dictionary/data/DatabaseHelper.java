@@ -75,7 +75,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			@Override
 			public void call(Subscriber<? super Pair<String, String>> subscriber) {
 				SQLiteDatabase database = getReadableDatabase();
-				String sql = "SELECT * FROM " + TABLE_FTS + " WHERE " + TABLE_FTS + " MATCH ? ORDER BY MATCHINFO(" + TABLE_FTS +")  DESC LIMIT 20 OFFSET 0";
+				String sql = "SELECT * FROM " + TABLE_FTS + " WHERE " + TABLE_FTS + " MATCH ? ORDER BY MATCHINFO(" + TABLE_FTS +")  DESC LIMIT 40 OFFSET 0";
 				Cursor cursor = database.rawQuery(sql, new String[]{query});
 				if (cursor.moveToFirst()) {
 					do {

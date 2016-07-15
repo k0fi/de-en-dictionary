@@ -39,6 +39,7 @@ public class MainActivity extends BaseActivity {
 
 	@Inject
 	TranslationService translationService;
+
 	private DictViewAdapter dictViewAdapter;
 	private EditText searchText;
 	private RecyclerView recyclerView;
