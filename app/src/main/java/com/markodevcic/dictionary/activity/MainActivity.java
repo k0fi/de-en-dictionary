@@ -41,7 +41,6 @@ public class MainActivity extends BaseActivity {
 
 	private DictViewAdapter dictViewAdapter;
 	private EditText searchText;
-	private RecyclerView recyclerView;
 	private ProgressBar progressBar;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
 	private PublishSubject<String> searchSubject = PublishSubject.create();
@@ -55,7 +54,7 @@ public class MainActivity extends BaseActivity {
 		progressBar.setVisibility(View.GONE);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		recyclerView = (RecyclerView) findViewById(R.id.results_view);
+		RecyclerView recyclerView = (RecyclerView) findViewById(R.id.results_view);
 		recyclerView.setHasFixedSize(false);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		recyclerView.setAdapter(dictViewAdapter);
@@ -90,7 +89,6 @@ public class MainActivity extends BaseActivity {
 				.subscribe(new Action1<List<String>>() {
 					@Override
 					public void call(List<String> strings) {
-						progressBar.setVisibility(View.GONE);
 						int size = strings.size();
 						String term = strings.get(size - 1);
 						translationSubscription.unsubscribe();
