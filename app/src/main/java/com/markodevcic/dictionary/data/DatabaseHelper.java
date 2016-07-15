@@ -84,6 +84,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 						subscriber.onNext(new Pair<>(deText, enText));
 					} while (cursor.moveToNext() && !subscriber.isUnsubscribed());
 				}
+				if (!subscriber.isUnsubscribed()) {
+					subscriber.onCompleted();
+				}
 				cursor.close();
 				database.close();
 			}
