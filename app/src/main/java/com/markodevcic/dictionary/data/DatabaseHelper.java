@@ -6,15 +6,12 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Log;
 import android.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -45,37 +42,12 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 
 	}
 
-	public List<Pair<String, String>> search(String query) {
-		SQLiteDatabase database = getReadableDatabase();
-		String sql = "SELECT * FROM " + TABLE_FTS + " WHERE " + TABLE_FTS + " MATCH ? ORDER BY OFFSETS(" + TABLE_FTS + ") ASC LIMIT 20 OFFSET 0";
-		String offsetSQL = "SELECT offsets(" + TABLE_FTS + ") FROM " + TABLE_FTS + " WHERE " + TABLE_FTS + " MATCH ? ORDER BY OFFSETS(" + TABLE_FTS + ") ASC LIMIT 20 OFFSET 0";
-		Cursor cursor = database.rawQuery(sql, new String[]{query});
-		Cursor offsetCursor = database.rawQuery(offsetSQL, new String[]{query});
-		if (offsetCursor.moveToFirst()) {
-			do {
-				Log.d("DB", offsetCursor.getString(0));
-			} while (offsetCursor.moveToNext());
-		}
-		offsetCursor.close();
-		List<Pair<String, String>> result = new ArrayList<>();
-		if (cursor.moveToFirst()) {
-			do {
-				String deText = cursor.getString(cursor.getColumnIndex(COL_DE_TEXT));
-				String enText = cursor.getString(cursor.getColumnIndex(COL_EN_TEXT));
-				result.add(new Pair<>(deText, enText));
-			} while (cursor.moveToNext());
-		}
-		cursor.close();
-		database.close();
-		return result;
-	}
-
 	public Observable<Pair<String, String>> startSearch(final String query) {
 		return Observable.create(new Observable.OnSubscribe<Pair<String, String>>() {
 			@Override
 			public void call(Subscriber<? super Pair<String, String>> subscriber) {
 				SQLiteDatabase database = getReadableDatabase();
-				String sql = "SELECT * FROM " + TABLE_FTS + " WHERE " + TABLE_FTS + " MATCH ? ORDER BY MATCHINFO(" + TABLE_FTS +", 'x')  DESC LIMIT 40 OFFSET 0";
+				String sql = "SELECT * FROM " + TABLE_FTS + " WHERE " + TABLE_FTS + " MATCH ? ORDER BY MATCHINFO(" + TABLE_FTS + ", 'x')  DESC LIMIT 40 OFFSET 0";
 				Cursor cursor = database.rawQuery(sql, new String[]{query});
 				if (cursor.moveToFirst() && !subscriber.isUnsubscribed()) {
 					do {
@@ -93,7 +65,21 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		});
 	}
 
-	public void loadDictionary() {
+	public Observable<Void> startLoadDictionary() {
+		return Observable.create(new Observable.OnSubscribe<Void>() {
+			@Override
+			public void call(Subscriber<? super Void> subscriber) {
+				try {
+					loadWords();
+					subscriber.onCompleted();
+				} catch (IOException e) {
+					subscriber.onError(e);
+				}
+			}
+		});
+	}
+
+	public void loadDictionaryAsync() {
 		new Thread(new Runnable() {
 			public void run() {
 				try {
