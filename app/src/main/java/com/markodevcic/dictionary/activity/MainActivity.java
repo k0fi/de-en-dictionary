@@ -1,19 +1,18 @@
 package com.markodevcic.dictionary.activity;
 
-import android.graphics.Color;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -64,7 +63,10 @@ public class MainActivity extends BaseActivity {
 		recyclerView.setHasFixedSize(false);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		recyclerView.setAdapter(dictViewAdapter);
+		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		searchText = (SearchView) findViewById(R.id.search_text);
+		searchText.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MainActivity.class)));
+		searchText.setIconifiedByDefault(false);
 		searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String query) {
@@ -144,7 +146,7 @@ public class MainActivity extends BaseActivity {
 				});
 	}
 
-	private void enumerateChildren(String text){
+	private void enumerateChildren(String text) {
 		int size = recyclerView.getChildCount();
 		for (int i = 0; i < size; i++) {
 			DictViewHolder viewHolder = (DictViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
@@ -212,7 +214,7 @@ public class MainActivity extends BaseActivity {
 			}
 		}
 
-		public void highlightText(String text){
+		public void highlightText(String text) {
 
 		}
 	}
