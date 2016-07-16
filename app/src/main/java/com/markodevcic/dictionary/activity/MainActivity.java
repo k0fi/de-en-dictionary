@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -18,14 +19,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.markodevcic.dictionary.R;
-import com.markodevcic.dictionary.injection.AppComponent;
+import com.markodevcic.dictionary.data.DatabaseHelper;
 import com.markodevcic.dictionary.translation.DictionaryEntry;
 import com.markodevcic.dictionary.translation.TranslationService;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
 
 import rx.Observer;
 import rx.Subscription;
@@ -33,11 +32,9 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends AppCompatActivity {
 
-	@Inject
-	TranslationService translationService;
-
+	private TranslationService translationService;
 	private DictViewAdapter dictViewAdapter;
 	private RecyclerView recyclerView;
 	private SearchView searchText;
@@ -51,6 +48,7 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		translationService = new TranslationService(new DatabaseHelper(this));
 		dictViewAdapter = new DictViewAdapter();
 		setContentView(R.layout.activity_main);
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -118,7 +116,7 @@ public class MainActivity extends BaseActivity {
 							public void run() {
 								highlightSearchTerm();
 							}
-						}, 500);
+						}, 200);
 					}
 
 					@Override
@@ -178,12 +176,7 @@ public class MainActivity extends BaseActivity {
 			textView.setText(spannable);
 		}
 	}
-
-	@Override
-	protected void inject(AppComponent appComponent) {
-		appComponent.inject(this);
-	}
-
+	
 	@Override
 	protected void onPause() {
 		super.onPause();

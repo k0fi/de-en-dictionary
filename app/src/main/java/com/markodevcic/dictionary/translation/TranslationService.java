@@ -6,15 +6,12 @@ import com.markodevcic.dictionary.data.DatabaseHelper;
 
 import java.util.Arrays;
 
-import javax.inject.Inject;
-
 import rx.Observable;
 import rx.functions.Func1;
 
 public final class TranslationService {
 	private final DatabaseHelper databaseHelper;
 
-	@Inject
 	public TranslationService(DatabaseHelper databaseHelper) {
 		this.databaseHelper = databaseHelper;
 	}

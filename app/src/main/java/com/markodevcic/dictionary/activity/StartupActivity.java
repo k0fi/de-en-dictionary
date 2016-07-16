@@ -2,18 +2,11 @@ package com.markodevcic.dictionary.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.ProgressBar;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.markodevcic.dictionary.R;
 import com.markodevcic.dictionary.data.DatabaseHelper;
-import com.markodevcic.dictionary.injection.AppComponent;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
 
 import rx.Observer;
 import rx.Subscription;
@@ -21,16 +14,16 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class StartupActivity extends BaseActivity {
+public class StartupActivity extends AppCompatActivity {
 
-	@Inject
-	DatabaseHelper databaseHelper;
+	private DatabaseHelper databaseHelper;
 
 	private Subscription loadSubscription = Subscriptions.unsubscribed();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		databaseHelper = new DatabaseHelper(this);
 		if (databaseHelper.getRowCount() > 0) {
 			startMainActivity();
 		} else {
@@ -66,10 +59,5 @@ public class StartupActivity extends BaseActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		loadSubscription.unsubscribe();
-	}
-
-	@Override
-	protected void inject(AppComponent appComponent) {
-		appComponent.inject(this);
 	}
 }
