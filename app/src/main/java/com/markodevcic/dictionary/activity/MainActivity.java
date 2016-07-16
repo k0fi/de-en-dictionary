@@ -3,7 +3,9 @@ package com.markodevcic.dictionary.activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -16,10 +18,12 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.markodevcic.dictionary.R;
 import com.markodevcic.dictionary.injection.AppComponent;
 import com.markodevcic.dictionary.translation.DictionaryEntry;
+import com.markodevcic.dictionary.translation.SuggestionProvider;
 import com.markodevcic.dictionary.translation.TranslationService;
 import com.markodevcic.dictionary.utils.StringUtils;
 
@@ -49,6 +53,10 @@ public class MainActivity extends BaseActivity {
 	private ProgressBar progressBar;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
 	private PublishSubject<String> searchSubject = PublishSubject.create();
+	private LinearLayoutManager layoutManager;
+
+	private boolean isSearching = false;
+	private String searchTerm = "";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +69,19 @@ public class MainActivity extends BaseActivity {
 		setSupportActionBar(toolbar);
 		recyclerView = (RecyclerView) findViewById(R.id.results_view);
 		recyclerView.setHasFixedSize(false);
-		recyclerView.setLayoutManager(new LinearLayoutManager(this));
+		layoutManager = new LinearLayoutManager(this);
+		recyclerView.setLayoutManager(layoutManager);
 		recyclerView.setAdapter(dictViewAdapter);
+		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+				super.onScrolled(recyclerView, dx, dy);
+				if (Math.abs(dx - dy) > 50) {
+					highlightSearchTerm();
+				}
+			}
+		});
+
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		searchText = (SearchView) findViewById(R.id.search_text);
 		searchText.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MainActivity.class)));
@@ -72,6 +91,7 @@ public class MainActivity extends BaseActivity {
 			public boolean onQueryTextSubmit(String query) {
 				searchSubject.onNext(query);
 				progressBar.setVisibility(View.VISIBLE);
+				isSearching = true;
 				return false;
 			}
 
@@ -79,26 +99,10 @@ public class MainActivity extends BaseActivity {
 			public boolean onQueryTextChange(String newText) {
 				searchSubject.onNext(newText);
 				progressBar.setVisibility(View.VISIBLE);
+				isSearching = true;
 				return false;
 			}
 		});
-//		searchText.addTextChangedListener(new TextWatcher() {
-//			@Override
-//			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//			}
-//
-//			@Override
-//			public void onTextChanged(CharSequence s, int start, int before, int count) {
-//				searchSubject.onNext(s.toString());
-//				if (start > 1) {
-//					progressBar.setVisibility(View.VISIBLE);
-//				}
-//			}
-//
-//			@Override
-//			public void afterTextChanged(Editable s) {
-//			}
-//		});
 
 		searchSubject.asObservable().buffer(1000, TimeUnit.MILLISECONDS)
 				.distinctUntilChanged()
@@ -127,6 +131,12 @@ public class MainActivity extends BaseActivity {
 										@Override
 										public void onCompleted() {
 											progressBar.setVisibility(View.GONE);
+											SearchRecentSuggestions recentSuggestions = new SearchRecentSuggestions(MainActivity.this,
+													SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
+											recentSuggestions.saveRecentQuery(term, null);
+											isSearching = false;
+											searchTerm = term;
+											highlightSearchTerm();
 										}
 
 										@Override
@@ -141,22 +151,50 @@ public class MainActivity extends BaseActivity {
 									});
 						} else {
 							progressBar.setVisibility(View.GONE);
+							isSearching = false;
+							searchTerm = "";
 						}
 					}
 				});
 	}
 
-	private void enumerateChildren(String text) {
-		int size = recyclerView.getChildCount();
-		for (int i = 0; i < size; i++) {
-			DictViewHolder viewHolder = (DictViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
-			String term = viewHolder.frgnMainText.getText().toString();
-			int index = term.indexOf(text);
-			if (index >= 0) {
-				Spannable spannable = new SpannableString(term);
-				spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)), index, text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				viewHolder.frgnMainText.setText(spannable);
-			}
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+			searchText.setQuery(query, false);
+
+		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+			String uri = intent.getDataString();
+			Toast.makeText(this, "Suggestion: "+ uri, Toast.LENGTH_SHORT).show();
+		}
+	}
+
+
+	private void highlightSearchTerm() {
+		if (isSearching) {
+			return;
+		}
+		int firstPosition = layoutManager.findFirstVisibleItemPosition();
+		int lastPosition = layoutManager.findLastVisibleItemPosition();
+		for (int i = firstPosition; i < lastPosition ; i++) {
+			DictViewHolder dictViewHolder = (DictViewHolder) recyclerView.findViewHolderForLayoutPosition(i);
+			setHighlightedText(dictViewHolder.deMainText);
+			setHighlightedText(dictViewHolder.frgnMainText);
+			setHighlightedText(dictViewHolder.deAltText);
+			setHighlightedText(dictViewHolder.frgnAltText);
+		}
+	}
+
+	private void setHighlightedText(TextView textView) {
+		String term = textView.getText().toString().toLowerCase();
+		int index = term.indexOf(searchTerm.toLowerCase());
+		if (index >= 0) {
+			Spannable spannable = new SpannableString(term);
+			spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)),
+					index, index + searchTerm.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			textView.setText(spannable);
 		}
 	}
 
