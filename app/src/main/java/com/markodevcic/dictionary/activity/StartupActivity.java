@@ -73,4 +73,3 @@ public class StartupActivity extends BaseActivity {
 		appComponent.inject(this);
 	}
 }
-

@@ -85,8 +85,8 @@ public class MainActivity extends BaseActivity {
 			@Override
 			public boolean onQueryTextSubmit(final String term) {
 				progressBar.setVisibility(View.VISIBLE);
-				startSearch(term);
 				isSearching = true;
+				startSearch(term);
 				return false;
 			}
 
