@@ -12,9 +12,11 @@ import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -74,14 +76,11 @@ public class MainActivity extends BaseActivity {
 		recyclerView.setAdapter(dictViewAdapter);
 		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 			@Override
-			public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-				super.onScrolled(recyclerView, dx, dy);
-				if (Math.abs(dx - dy) > 50) {
-					highlightSearchTerm();
-				}
+			public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+				super.onScrollStateChanged(recyclerView, newState);
+				highlightSearchTerm();
 			}
 		});
-
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		searchText = (SearchView) findViewById(R.id.search_text);
 		searchText.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MainActivity.class)));
@@ -136,7 +135,12 @@ public class MainActivity extends BaseActivity {
 											recentSuggestions.saveRecentQuery(term, null);
 											isSearching = false;
 											searchTerm = term;
-											highlightSearchTerm();
+											progressBar.postDelayed(new Runnable() {
+												@Override
+												public void run() {
+													highlightSearchTerm();
+												}
+											}, 500);
 										}
 
 										@Override
@@ -167,7 +171,7 @@ public class MainActivity extends BaseActivity {
 
 		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
 			String uri = intent.getDataString();
-			Toast.makeText(this, "Suggestion: "+ uri, Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Suggestion: " + uri, Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -178,7 +182,7 @@ public class MainActivity extends BaseActivity {
 		}
 		int firstPosition = layoutManager.findFirstVisibleItemPosition();
 		int lastPosition = layoutManager.findLastVisibleItemPosition();
-		for (int i = firstPosition; i < lastPosition ; i++) {
+		for (int i = firstPosition; i < lastPosition; i++) {
 			DictViewHolder dictViewHolder = (DictViewHolder) recyclerView.findViewHolderForLayoutPosition(i);
 			setHighlightedText(dictViewHolder.deMainText);
 			setHighlightedText(dictViewHolder.frgnMainText);
@@ -188,10 +192,11 @@ public class MainActivity extends BaseActivity {
 	}
 
 	private void setHighlightedText(TextView textView) {
-		String term = textView.getText().toString().toLowerCase();
+		String originalTerm = textView.getText().toString();
+		String term = originalTerm.toLowerCase();
 		int index = term.indexOf(searchTerm.toLowerCase());
 		if (index >= 0) {
-			Spannable spannable = new SpannableString(term);
+			Spannable spannable = new SpannableString(originalTerm);
 			spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)),
 					index, index + searchTerm.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			textView.setText(spannable);
