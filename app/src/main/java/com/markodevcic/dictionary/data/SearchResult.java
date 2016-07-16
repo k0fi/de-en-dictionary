@@ -1,8 +1,5 @@
 package com.markodevcic.dictionary.data;
 
-/**
- * Created by deva on 15.07.16.
- */
 public final class SearchResult {
 
 	private final String deText;

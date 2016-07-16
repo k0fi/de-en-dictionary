@@ -98,10 +98,10 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			String insertSql = "INSERT INTO " + TABLE_FTS + " (" + COL_DE_TEXT + ", " + COL_EN_TEXT + ")" + " VALUES (?,?)";
 			String line;
 			SQLiteStatement insertStatement = database.compileStatement(insertSql);
+			database.execSQL("PRAGMA synchronous = OFF");
 			database.beginTransaction();
 			while ((line = reader.readLine()) != null) {
 				String[] splitted = line.split("::");
-				insertStatement.clearBindings();
 				insertStatement.bindString(1, splitted[0].trim());
 				insertStatement.bindString(2, splitted[1].trim());
 				insertStatement.executeInsert();
@@ -109,6 +109,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			database.setTransactionSuccessful();
 		} finally {
 			database.endTransaction();
+			database.execSQL("PRAGMA synchronous = ON");
 			database.close();
 		}
 	}
