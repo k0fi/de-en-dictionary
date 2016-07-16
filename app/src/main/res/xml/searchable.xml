@@ -2,11 +2,11 @@
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
             android:label="@string/search_label"
             android:hint="@string/search_hint"
-            android:searchSuggestAuthority="com.markodevcic.dictionary.translation.SuggestionProvider"
             android:searchSuggestSelection=" ?"
-            android:includeInGlobalSearch="true"
             android:searchMode="queryRewriteFromText|queryRewriteFromData"
             android:inputType="textAutoComplete"
             android:voiceSearchMode="showVoiceSearchButton|launchRecognizer"
-            android:searchSettingsDescription="@string/settings_description" >
+            android:voiceLanguage="de|en"
+            android:searchSuggestIntentAction="android.intent.action.VIEW"
+            >
 </searchable>

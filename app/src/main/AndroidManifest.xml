@@ -11,9 +11,11 @@
         android:theme="@style/AppTheme">
 
         <provider
-            android:name=".translation.SuggestionProvider"
-            android:authorities="com.markodevcic.dictionary.translation.SuggestionProvider"/>
-
+            android:authorities="com.markodevcic.dictionary.translation.SuggestionContentProvider"
+            android:name=".translation.SuggestionContentProvider"
+            android:enabled="false"
+            android:exported="false"/>
+        
         <activity
             android:name=".activity.MainActivity"
             android:launchMode="singleTop">

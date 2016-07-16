@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">DE-EN Dictionary</string>
-    <string name="search_hint">just start typing here ...</string>
-    <string name="search_label">label</string>
-    <string name="settings_description">description</string>
+    <string name="search_hint">just start typing ...</string>
+    <string name="search_label">Search</string>
 </resources>

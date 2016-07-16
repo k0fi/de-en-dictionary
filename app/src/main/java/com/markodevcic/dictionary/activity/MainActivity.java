@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.SearchRecentSuggestions;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -21,21 +20,14 @@ import android.widget.Toast;
 import com.markodevcic.dictionary.R;
 import com.markodevcic.dictionary.injection.AppComponent;
 import com.markodevcic.dictionary.translation.DictionaryEntry;
-import com.markodevcic.dictionary.translation.SuggestionProvider;
 import com.markodevcic.dictionary.translation.TranslationService;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
-import rx.subjects.PublishSubject;
 import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends BaseActivity {
@@ -48,7 +40,6 @@ public class MainActivity extends BaseActivity {
 	private SearchView searchText;
 	private ProgressBar progressBar;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
-	private PublishSubject<String> searchSubject = PublishSubject.create();
 	private LinearLayoutManager layoutManager;
 
 	private boolean isSearching = false;
@@ -68,11 +59,19 @@ public class MainActivity extends BaseActivity {
 		layoutManager = new LinearLayoutManager(this);
 		recyclerView.setLayoutManager(layoutManager);
 		recyclerView.setAdapter(dictViewAdapter);
-		recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+		recyclerView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
 			@Override
-			public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-				super.onScrollStateChanged(recyclerView, newState);
-				highlightSearchTerm();
+			public void onChildViewAttachedToWindow(View view) {
+				DictViewHolder dictViewHolder = (DictViewHolder)recyclerView.getChildViewHolder(view);
+				setHighlightedText(dictViewHolder.deMainText);
+				setHighlightedText(dictViewHolder.frgnMainText);
+				setHighlightedText(dictViewHolder.deAltText);
+				setHighlightedText(dictViewHolder.frgnAltText);
+			}
+
+			@Override
+			public void onChildViewDetachedFromWindow(View view) {
+
 			}
 		});
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -81,77 +80,54 @@ public class MainActivity extends BaseActivity {
 		searchText.setIconifiedByDefault(false);
 		searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
-			public boolean onQueryTextSubmit(String query) {
-				searchSubject.onNext(query);
+			public boolean onQueryTextSubmit(final String term) {
 				progressBar.setVisibility(View.VISIBLE);
+				startSearch(term);
 				isSearching = true;
 				return false;
 			}
 
 			@Override
-			public boolean onQueryTextChange(String newText) {
-				searchSubject.onNext(newText);
+			public boolean onQueryTextChange(final String term) {
 				progressBar.setVisibility(View.VISIBLE);
 				isSearching = true;
+				startSearch(term);
 				return false;
 			}
 		});
+	}
 
-		searchSubject.asObservable().buffer(1000, TimeUnit.MILLISECONDS)
-				.distinctUntilChanged()
-				.filter(new Func1<List<String>, Boolean>() {
-					@Override
-					public Boolean call(List<String> strings) {
-						return strings.size() > 0;
-					}
-				})
+	private void startSearch(final String term) {
+		translationSubscription.unsubscribe();
+		dictViewAdapter.clearItems();
+		translationSubscription = translationService.startQuery(term)
+				.onBackpressureBuffer()
+				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(new Action1<List<String>>() {
+				.subscribe(new Observer<DictionaryEntry>() {
 					@Override
-					public void call(List<String> strings) {
-						int size = strings.size();
-						final String term = strings.get(size - 1);
-						translationSubscription.unsubscribe();
-						dictViewAdapter.clearItems();
-						if (term.length() > 1) {
-							translationSubscription.unsubscribe();
-							dictViewAdapter.clearItems();
-							translationSubscription = translationService.startQuery(term)
-									.onBackpressureBuffer()
-									.subscribeOn(Schedulers.io())
-									.observeOn(AndroidSchedulers.mainThread())
-									.subscribe(new Observer<DictionaryEntry>() {
-										@Override
-										public void onCompleted() {
-											progressBar.setVisibility(View.GONE);
-//											SearchRecentSuggestions recentSuggestions = new SearchRecentSuggestions(MainActivity.this,
-//													SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
-//											recentSuggestions.saveRecentQuery(term, null);
-											isSearching = false;
-											searchTerm = term;
-											progressBar.postDelayed(new Runnable() {
-												@Override
-												public void run() {
-													highlightSearchTerm();
-												}
-											}, 500);
-										}
+					public void onCompleted() {
+						progressBar.setVisibility(View.GONE);
+						isSearching = false;
+						searchTerm = term;
+						progressBar.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								highlightSearchTerm();
+							}
+						}, 500);
+					}
 
-										@Override
-										public void onError(Throwable e) {
-											Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-										}
+					@Override
+					public void onError(Throwable e) {
+						progressBar.setVisibility(View.GONE);
+						isSearching = false;
+						Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+					}
 
-										@Override
-										public void onNext(DictionaryEntry dictionaryEntry) {
-											dictViewAdapter.addItem(dictionaryEntry);
-										}
-									});
-						} else {
-							progressBar.setVisibility(View.GONE);
-							isSearching = false;
-							searchTerm = "";
-						}
+					@Override
+					public void onNext(DictionaryEntry dictionaryEntry) {
+						dictViewAdapter.addItem(dictionaryEntry);
 					}
 				});
 	}
@@ -162,26 +138,26 @@ public class MainActivity extends BaseActivity {
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
 			String query = intent.getStringExtra(SearchManager.QUERY);
 			searchText.setQuery(query, false);
-
 		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-			String uri = intent.getDataString();
-			Toast.makeText(this, "Suggestion: " + uri, Toast.LENGTH_SHORT).show();
+			String query = intent.getDataString();
+			searchText.setQuery(query, false);
 		}
 	}
-
 
 	private void highlightSearchTerm() {
 		if (isSearching) {
 			return;
 		}
 		int firstPosition = layoutManager.findFirstVisibleItemPosition();
-		int lastPosition = layoutManager.findLastVisibleItemPosition();
+		int lastPosition = layoutManager.findLastVisibleItemPosition() + 1;
 		for (int i = firstPosition; i < lastPosition; i++) {
 			DictViewHolder dictViewHolder = (DictViewHolder) recyclerView.findViewHolderForLayoutPosition(i);
-			setHighlightedText(dictViewHolder.deMainText);
-			setHighlightedText(dictViewHolder.frgnMainText);
-			setHighlightedText(dictViewHolder.deAltText);
-			setHighlightedText(dictViewHolder.frgnAltText);
+			if (dictViewHolder != null) {
+				setHighlightedText(dictViewHolder.deMainText);
+				setHighlightedText(dictViewHolder.frgnMainText);
+				setHighlightedText(dictViewHolder.deAltText);
+				setHighlightedText(dictViewHolder.frgnAltText);
+			}
 		}
 	}
 
