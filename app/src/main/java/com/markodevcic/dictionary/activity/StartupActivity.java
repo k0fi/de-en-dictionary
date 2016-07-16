@@ -28,7 +28,7 @@ public class StartupActivity extends AppCompatActivity {
 			startMainActivity();
 		} else {
 			setContentView(R.layout.activity_startup);
-			databaseHelper.startLoadDictionary()
+			loadSubscription = databaseHelper.startLoadDictionary()
 					.subscribeOn(Schedulers.io())
 					.observeOn(AndroidSchedulers.mainThread())
 					.subscribe(new Observer<Void>() {

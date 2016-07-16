@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
 			textView.setText(spannable);
 		}
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();

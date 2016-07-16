@@ -10,9 +10,7 @@ import android.provider.BaseColumns;
 import android.support.annotation.Nullable;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public final class SuggestionContentProvider extends ContentProvider{
 
