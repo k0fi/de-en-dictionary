@@ -29,11 +29,17 @@ final class DictViewAdapter extends RecyclerView.Adapter<DictViewHolder> {
 		holder.frgnMainText.setText(dictionaryEntry.getFrgnMainTerm());
 		String[] deAltTerms = dictionaryEntry.getDeAltTerms();
 		if (deAltTerms != null) {
+			holder.deAltText.setVisibility(View.VISIBLE);
 			holder.deAltText.setText(StringUtils.join(deAltTerms, "\n").trim());
+		} else {
+			holder.deAltText.setVisibility(View.GONE);
 		}
 		String[] frgnAltTerms = dictionaryEntry.getFrgnAltTerms();
 		if (frgnAltTerms != null) {
+			holder.frgnAltText.setVisibility(View.VISIBLE);
 			holder.frgnAltText.setText(StringUtils.join(frgnAltTerms, "\n").trim());
+		} else {
+			holder.frgnAltText.setVisibility(View.GONE);
 		}
 	}
 

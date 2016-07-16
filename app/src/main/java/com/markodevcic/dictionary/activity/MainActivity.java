@@ -124,9 +124,9 @@ public class MainActivity extends BaseActivity {
 										@Override
 										public void onCompleted() {
 											progressBar.setVisibility(View.GONE);
-											SearchRecentSuggestions recentSuggestions = new SearchRecentSuggestions(MainActivity.this,
-													SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
-											recentSuggestions.saveRecentQuery(term, null);
+//											SearchRecentSuggestions recentSuggestions = new SearchRecentSuggestions(MainActivity.this,
+//													SuggestionProvider.AUTHORITY, SuggestionProvider.MODE);
+//											recentSuggestions.saveRecentQuery(term, null);
 											isSearching = false;
 											searchTerm = term;
 											progressBar.postDelayed(new Runnable() {
@@ -139,7 +139,7 @@ public class MainActivity extends BaseActivity {
 
 										@Override
 										public void onError(Throwable e) {
-
+											Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
 										}
 
 										@Override
