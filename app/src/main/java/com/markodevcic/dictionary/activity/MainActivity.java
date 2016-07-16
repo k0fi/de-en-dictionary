@@ -1,16 +1,21 @@
 package com.markodevcic.dictionary.activity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.markodevcic.dictionary.R;
@@ -40,7 +45,8 @@ public class MainActivity extends BaseActivity {
 	TranslationService translationService;
 
 	private DictViewAdapter dictViewAdapter;
-	private EditText searchText;
+	private RecyclerView recyclerView;
+	private SearchView searchText;
 	private ProgressBar progressBar;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
 	private PublishSubject<String> searchSubject = PublishSubject.create();
@@ -54,28 +60,43 @@ public class MainActivity extends BaseActivity {
 		progressBar.setVisibility(View.GONE);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-		RecyclerView recyclerView = (RecyclerView) findViewById(R.id.results_view);
+		recyclerView = (RecyclerView) findViewById(R.id.results_view);
 		recyclerView.setHasFixedSize(false);
 		recyclerView.setLayoutManager(new LinearLayoutManager(this));
 		recyclerView.setAdapter(dictViewAdapter);
-		searchText = (EditText) findViewById(R.id.search_text);
-		searchText.addTextChangedListener(new TextWatcher() {
+		searchText = (SearchView) findViewById(R.id.search_text);
+		searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			public boolean onQueryTextSubmit(String query) {
+				searchSubject.onNext(query);
+				progressBar.setVisibility(View.VISIBLE);
+				return false;
 			}
 
 			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				searchSubject.onNext(s.toString());
-				if (start > 1) {
-					progressBar.setVisibility(View.VISIBLE);
-				}
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
+			public boolean onQueryTextChange(String newText) {
+				searchSubject.onNext(newText);
+				progressBar.setVisibility(View.VISIBLE);
+				return false;
 			}
 		});
+//		searchText.addTextChangedListener(new TextWatcher() {
+//			@Override
+//			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//			}
+//
+//			@Override
+//			public void onTextChanged(CharSequence s, int start, int before, int count) {
+//				searchSubject.onNext(s.toString());
+//				if (start > 1) {
+//					progressBar.setVisibility(View.VISIBLE);
+//				}
+//			}
+//
+//			@Override
+//			public void afterTextChanged(Editable s) {
+//			}
+//		});
 
 		searchSubject.asObservable().buffer(1000, TimeUnit.MILLISECONDS)
 				.distinctUntilChanged()
@@ -90,13 +111,13 @@ public class MainActivity extends BaseActivity {
 					@Override
 					public void call(List<String> strings) {
 						int size = strings.size();
-						String term = strings.get(size - 1);
+						final String term = strings.get(size - 1);
 						translationSubscription.unsubscribe();
 						dictViewAdapter.clearItems();
 						if (term.length() > 1) {
 							translationSubscription.unsubscribe();
 							dictViewAdapter.clearItems();
-							translationSubscription = translationService.startQuery(searchText.getText().toString())
+							translationSubscription = translationService.startQuery(term)
 									.onBackpressureBuffer()
 									.subscribeOn(Schedulers.io())
 									.observeOn(AndroidSchedulers.mainThread())
@@ -121,6 +142,20 @@ public class MainActivity extends BaseActivity {
 						}
 					}
 				});
+	}
+
+	private void enumerateChildren(String text){
+		int size = recyclerView.getChildCount();
+		for (int i = 0; i < size; i++) {
+			DictViewHolder viewHolder = (DictViewHolder) recyclerView.getChildViewHolder(recyclerView.getChildAt(i));
+			String term = viewHolder.frgnMainText.getText().toString();
+			int index = term.indexOf(text);
+			if (index >= 0) {
+				Spannable spannable = new SpannableString(term);
+				spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)), index, text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				viewHolder.frgnMainText.setText(spannable);
+			}
+		}
 	}
 
 	@Override
@@ -175,6 +210,10 @@ public class MainActivity extends BaseActivity {
 				dictionaryEntries.clear();
 				notifyItemRangeRemoved(0, size);
 			}
+		}
+
+		public void highlightText(String text){
+
 		}
 	}
 
