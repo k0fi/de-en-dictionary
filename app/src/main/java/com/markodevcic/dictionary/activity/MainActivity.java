@@ -22,6 +22,9 @@ import com.markodevcic.dictionary.injection.AppComponent;
 import com.markodevcic.dictionary.translation.DictionaryEntry;
 import com.markodevcic.dictionary.translation.TranslationService;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import rx.Observer;
@@ -101,10 +104,10 @@ public class MainActivity extends BaseActivity {
 		translationSubscription.unsubscribe();
 		dictViewAdapter.clearItems();
 		translationSubscription = translationService.startQuery(term)
-				.onBackpressureBuffer()
+				.buffer(200, TimeUnit.MILLISECONDS)
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(new Observer<DictionaryEntry>() {
+				.subscribe(new Observer<List<DictionaryEntry>>() {
 					@Override
 					public void onCompleted() {
 						progressBar.setVisibility(View.GONE);
@@ -126,8 +129,11 @@ public class MainActivity extends BaseActivity {
 					}
 
 					@Override
-					public void onNext(DictionaryEntry dictionaryEntry) {
-						dictViewAdapter.addItem(dictionaryEntry);
+					public void onNext(List<DictionaryEntry> dictionaryEntries) {
+						int size = dictionaryEntries.size();
+						for (int i = 0; i < size; i++) {
+							dictViewAdapter.addItem(dictionaryEntries.get(i));
+						}
 					}
 				});
 	}
