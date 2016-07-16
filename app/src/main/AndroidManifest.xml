@@ -11,19 +11,24 @@
         android:theme="@style/AppTheme">
 
         <provider
-            android:authorities="com.markodevcic.dictionary.translation.SuggestionContentProvider"
             android:name=".translation.SuggestionContentProvider"
+            android:authorities="com.markodevcic.dictionary.translation.SuggestionContentProvider"
             android:enabled="false"
             android:exported="false"/>
-        
+
         <activity
-            android:name=".activity.MainActivity"
-            android:launchMode="singleTop">
+            android:name=".activity.StartupActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activity.MainActivity"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>
