@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 					public void onCompleted() {
 						progressBar.setVisibility(View.GONE);
 						isSearching = false;
-						searchTerm = term;
+						searchTerm = term.toLowerCase();
 						progressBar.postDelayed(new Runnable() {
 							@Override
 							public void run() {
@@ -168,13 +168,18 @@ public class MainActivity extends AppCompatActivity {
 	private void setHighlightedText(TextView textView) {
 		String originalTerm = textView.getText().toString();
 		String term = originalTerm.toLowerCase();
-		int index = term.indexOf(searchTerm.toLowerCase());
-		if (index >= 0) {
-			Spannable spannable = new SpannableString(originalTerm);
+		int index = term.indexOf(searchTerm);
+		if (index < 0) {
+			return;
+		}
+
+		Spannable spannable = new SpannableString(originalTerm);
+		while (index >= 0) {
 			spannable.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)),
 					index, index + searchTerm.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			textView.setText(spannable);
+			index = term.indexOf(searchTerm, searchTerm.length() + index);
 		}
+		textView.setText(spannable);
 	}
 
 	@Override
