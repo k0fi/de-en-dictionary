@@ -49,18 +49,25 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 				SQLiteDatabase database = getReadableDatabase();
 				String sql = "SELECT * FROM " + TABLE_FTS + " WHERE " + TABLE_FTS + " MATCH ? ORDER BY MATCHINFO(" + TABLE_FTS + ", 'x')  DESC LIMIT 50 OFFSET 0";
 				Cursor cursor = database.rawQuery(sql, new String[]{query + "*"});
-				if (cursor.moveToFirst() && !subscriber.isUnsubscribed()) {
-					do {
-						String deText = cursor.getString(cursor.getColumnIndex(COL_DE_TEXT));
-						String enText = cursor.getString(cursor.getColumnIndex(COL_EN_TEXT));
-						subscriber.onNext(new Pair<>(deText, enText));
-					} while (cursor.moveToNext() && !subscriber.isUnsubscribed());
+				try {
+					if (cursor.moveToFirst() && !subscriber.isUnsubscribed()) {
+						do {
+							String deText = cursor.getString(cursor.getColumnIndex(COL_DE_TEXT));
+							String enText = cursor.getString(cursor.getColumnIndex(COL_EN_TEXT));
+							subscriber.onNext(new Pair<>(deText, enText));
+						} while (cursor.moveToNext() && !subscriber.isUnsubscribed());
+					}
+					if (!subscriber.isUnsubscribed()) {
+						subscriber.onCompleted();
+					}
+				} catch (Exception e) {
+					if (!subscriber.isUnsubscribed()) {
+						subscriber.onError(e);
+					}
+				}finally {
+					database.close();
+					cursor.close();
 				}
-				if (!subscriber.isUnsubscribed()) {
-					subscriber.onCompleted();
-				}
-				cursor.close();
-				database.close();
 			}
 		});
 	}
