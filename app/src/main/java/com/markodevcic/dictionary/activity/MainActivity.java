@@ -32,7 +32,8 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+		implements Observer<List<DictionaryEntry>> {
 
 	private TranslationService translationService;
 	private DictViewAdapter dictViewAdapter;
@@ -63,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
 		recyclerView.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
 			@Override
 			public void onChildViewAttachedToWindow(View view) {
-				DictViewHolder dictViewHolder = (DictViewHolder)recyclerView.getChildViewHolder(view);
+				DictViewHolder dictViewHolder = (DictViewHolder) recyclerView.getChildViewHolder(view);
 				setHighlightedText(dictViewHolder.deMainText);
 				setHighlightedText(dictViewHolder.frgnMainText);
 				setHighlightedText(dictViewHolder.deAltText);
@@ -105,35 +106,8 @@ public class MainActivity extends AppCompatActivity {
 				.buffer(200, TimeUnit.MILLISECONDS)
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(new Observer<List<DictionaryEntry>>() {
-					@Override
-					public void onCompleted() {
-						progressBar.setVisibility(View.GONE);
-						isSearching = false;
-						searchTerm = term.toLowerCase();
-						progressBar.postDelayed(new Runnable() {
-							@Override
-							public void run() {
-								highlightSearchTerm();
-							}
-						}, 200);
-					}
-
-					@Override
-					public void onError(Throwable e) {
-						progressBar.setVisibility(View.GONE);
-						isSearching = false;
-						Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-					}
-
-					@Override
-					public void onNext(List<DictionaryEntry> dictionaryEntries) {
-						int size = dictionaryEntries.size();
-						for (int i = 0; i < size; i++) {
-							dictViewAdapter.addItem(dictionaryEntries.get(i));
-						}
-					}
-				});
+				.subscribe(this);
+		searchTerm = term.toLowerCase();
 	}
 
 	@Override
@@ -186,5 +160,32 @@ public class MainActivity extends AppCompatActivity {
 	protected void onPause() {
 		super.onPause();
 		translationSubscription.unsubscribe();
+	}
+
+	@Override
+	public void onCompleted() {
+		progressBar.setVisibility(View.GONE);
+		isSearching = false;
+		progressBar.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				highlightSearchTerm();
+			}
+		}, 200);
+	}
+
+	@Override
+	public void onError(Throwable e) {
+		progressBar.setVisibility(View.GONE);
+		isSearching = false;
+		Toast.makeText(MainActivity.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+	}
+
+	@Override
+	public void onNext(List<DictionaryEntry> dictionaryEntries) {
+		int size = dictionaryEntries.size();
+		for (int i = 0; i < size; i++) {
+			dictViewAdapter.addItem(dictionaryEntries.get(i));
+		}
 	}
 }
