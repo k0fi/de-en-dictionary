@@ -46,6 +46,13 @@ public class MainActivity extends AppCompatActivity
 	private boolean isSearching = false;
 	private String searchTerm = "";
 
+	private final Runnable highlightRunnable = new Runnable() {
+		@Override
+		public void run() {
+			highlightVisibleItems();
+		}
+	};
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -124,7 +131,7 @@ public class MainActivity extends AppCompatActivity
 		}
 	}
 
-	private void highlightSearchTerm() {
+	private void highlightVisibleItems() {
 		if (isSearching) {
 			return;
 		}
@@ -168,12 +175,7 @@ public class MainActivity extends AppCompatActivity
 	public void onCompleted() {
 		progressBar.setVisibility(View.GONE);
 		isSearching = false;
-		progressBar.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				highlightSearchTerm();
-			}
-		}, 200);
+		progressBar.postDelayed(highlightRunnable, 200);
 	}
 
 	@Override
