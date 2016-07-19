@@ -39,6 +39,7 @@ public class StartupActivity extends AppCompatActivity {
 
 						@Override
 						public void onError(Throwable e) {
+
 							Toast.makeText(StartupActivity.this, "Error while loading data", Toast.LENGTH_LONG).show();
 						}
 
