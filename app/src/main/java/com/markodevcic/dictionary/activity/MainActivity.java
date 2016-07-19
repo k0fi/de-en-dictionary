@@ -83,20 +83,22 @@ public class MainActivity extends AppCompatActivity
 		searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(final String term) {
-				progressBar.setVisibility(View.VISIBLE);
-				isSearching = true;
-				startSearch(term);
+				onSearch(term);
 				return false;
 			}
 
 			@Override
 			public boolean onQueryTextChange(final String term) {
-				progressBar.setVisibility(View.VISIBLE);
-				isSearching = true;
-				startSearch(term);
+				onSearch(term);
 				return false;
 			}
 		});
+	}
+
+	private void onSearch(String term) {
+		progressBar.setVisibility(View.VISIBLE);
+		isSearching = true;
+		startSearch(term);
 	}
 
 	private void startSearch(final String term) {
