@@ -86,18 +86,6 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		});
 	}
 
-	public void loadDictionaryAsync() {
-		new Thread(new Runnable() {
-			public void run() {
-				try {
-					loadWords();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}).start();
-	}
-
 	private void loadWords() throws IOException {
 		InputStream inputStream = context.getAssets().open("de-en.txt");
 		SQLiteDatabase database = getWritableDatabase();
