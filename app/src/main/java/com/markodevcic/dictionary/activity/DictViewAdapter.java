@@ -26,7 +26,7 @@ final class DictViewAdapter extends RecyclerView.Adapter<DictViewHolder> {
 	public void onBindViewHolder(DictViewHolder holder, int position) {
 		DictionaryEntry dictionaryEntry = dictionaryEntries.get(position);
 		holder.deMainText.setText(dictionaryEntry.getDeMainTerm());
-		holder.frgnMainText.setText(dictionaryEntry.getFrgnMainTerm());
+		holder.enMainText.setText(dictionaryEntry.getFrgnMainTerm());
 		String[] deAltTerms = dictionaryEntry.getDeAltTerms();
 		if (deAltTerms != null) {
 			holder.deAltText.setVisibility(View.VISIBLE);
@@ -36,10 +36,10 @@ final class DictViewAdapter extends RecyclerView.Adapter<DictViewHolder> {
 		}
 		String[] frgnAltTerms = dictionaryEntry.getFrgnAltTerms();
 		if (frgnAltTerms != null) {
-			holder.frgnAltText.setVisibility(View.VISIBLE);
-			holder.frgnAltText.setText(StringUtils.join(frgnAltTerms, "\n").trim());
+			holder.enAltText.setVisibility(View.VISIBLE);
+			holder.enAltText.setText(StringUtils.join(frgnAltTerms, "\n").trim());
 		} else {
-			holder.frgnAltText.setVisibility(View.GONE);
+			holder.enAltText.setVisibility(View.GONE);
 		}
 	}
 

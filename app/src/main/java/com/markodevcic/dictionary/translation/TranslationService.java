@@ -18,18 +18,19 @@ public final class TranslationService {
 
 	public Observable<DictionaryEntry> startQuery(final String term) {
 		return databaseHelper.startSearch(term)
-				.map(new Func1<Pair<String, String>, DictionaryEntry>() {
+				.map(new Func1<String, DictionaryEntry>() {
 					@Override
-					public DictionaryEntry call(Pair<String, String> result) {
+					public DictionaryEntry call(String result) {
 						return createEntry(result);
 					}
 				});
 	}
 
-	private DictionaryEntry createEntry(Pair<String, String> result) {
-		Pair<String, String[]> deEntries = parseString(result.first);
-		Pair<String, String[]> frngEntries = parseString(result.second);
-		return new DictionaryEntry(deEntries.first, deEntries.second, frngEntries.first, frngEntries.second);
+	private DictionaryEntry createEntry(String result) {
+		String[] splitted = result.split("::");
+		Pair<String, String[]> deEntries = parseString(splitted[0]);
+		Pair<String, String[]> enEntries = parseString(splitted[1]);
+		return new DictionaryEntry(deEntries.first, deEntries.second, enEntries.first, enEntries.second);
 	}
 
 	private Pair<String, String[]> parseString(String text) {

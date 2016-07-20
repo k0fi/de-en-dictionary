@@ -73,9 +73,9 @@ public class MainActivity extends AppCompatActivity
 			public void onChildViewAttachedToWindow(View view) {
 				DictViewHolder dictViewHolder = (DictViewHolder) recyclerView.getChildViewHolder(view);
 				setHighlightedText(dictViewHolder.deMainText);
-				setHighlightedText(dictViewHolder.frgnMainText);
+				setHighlightedText(dictViewHolder.enMainText);
 				setHighlightedText(dictViewHolder.deAltText);
-				setHighlightedText(dictViewHolder.frgnAltText);
+				setHighlightedText(dictViewHolder.enAltText);
 			}
 
 			@Override
@@ -141,9 +141,9 @@ public class MainActivity extends AppCompatActivity
 			DictViewHolder dictViewHolder = (DictViewHolder) recyclerView.findViewHolderForLayoutPosition(i);
 			if (dictViewHolder != null) {
 				setHighlightedText(dictViewHolder.deMainText);
-				setHighlightedText(dictViewHolder.frgnMainText);
+				setHighlightedText(dictViewHolder.enMainText);
 				setHighlightedText(dictViewHolder.deAltText);
-				setHighlightedText(dictViewHolder.frgnAltText);
+				setHighlightedText(dictViewHolder.enAltText);
 			}
 		}
 	}

@@ -6,7 +6,6 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
-import android.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,11 +17,10 @@ import rx.Subscriber;
 
 public final class DatabaseHelper extends SQLiteOpenHelper {
 
-	public static final String TABLE_FTS = "fts_table";
-	public static final String COL_EN_TEXT = "text_en";
-	public static final String COL_DE_TEXT = "text_de";
+	public static final String DICT_TABLE = "dict_table";
+	public static final String COL_ENTRY = "entry";
 
-	private static final String SEARCH_SQL = "SELECT * FROM " + TABLE_FTS + " WHERE " + TABLE_FTS + " MATCH ? ORDER BY MATCHINFO(" + TABLE_FTS + ", 'x')  DESC LIMIT 50 OFFSET 0";
+	private static final String SEARCH_SQL = "SELECT * FROM " + DICT_TABLE + " WHERE " + DICT_TABLE + " MATCH ? ORDER BY MATCHINFO(" + DICT_TABLE + ", 'x')  DESC LIMIT 50 OFFSET 0";
 	private static final String DB_NAME = "dict_db";
 	private static final int DB_VERSION = 1;
 
@@ -35,7 +33,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL("CREATE VIRTUAL TABLE " + TABLE_FTS + " USING FTS4 (" + COL_DE_TEXT + ", " + COL_EN_TEXT + ")");
+		db.execSQL("CREATE VIRTUAL TABLE " + DICT_TABLE + " USING FTS4 (" + COL_ENTRY + ")");
 	}
 
 	@Override
@@ -43,18 +41,17 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 
 	}
 
-	public Observable<Pair<String, String>> startSearch(final String query) {
-		return Observable.create(new Observable.OnSubscribe<Pair<String, String>>() {
+	public Observable<String> startSearch(final String query) {
+		return Observable.create(new Observable.OnSubscribe<String>() {
 			@Override
-			public void call(Subscriber<? super Pair<String, String>> subscriber) {
+			public void call(Subscriber<? super String> subscriber) {
 				SQLiteDatabase database = getReadableDatabase();
 				Cursor cursor = database.rawQuery(SEARCH_SQL, new String[]{query + "*"});
 				try {
 					if (cursor.moveToFirst() && !subscriber.isUnsubscribed()) {
 						do {
-							String deText = cursor.getString(cursor.getColumnIndex(COL_DE_TEXT));
-							String enText = cursor.getString(cursor.getColumnIndex(COL_EN_TEXT));
-							subscriber.onNext(new Pair<>(deText, enText));
+							String deText = cursor.getString(cursor.getColumnIndex(COL_ENTRY));
+							subscriber.onNext(deText);
 						} while (cursor.moveToNext() && !subscriber.isUnsubscribed());
 					}
 					if (!subscriber.isUnsubscribed()) {
@@ -90,15 +87,13 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		InputStream inputStream = context.getAssets().open("de-en.txt");
 		SQLiteDatabase database = getWritableDatabase();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-			String insertSql = "INSERT INTO " + TABLE_FTS + " (" + COL_DE_TEXT + ", " + COL_EN_TEXT + ")" + " VALUES (?,?)";
+			String insertSql = "INSERT INTO " + DICT_TABLE + " (" + COL_ENTRY + ")" + " VALUES (?)";
 			String line;
 			SQLiteStatement insertStatement = database.compileStatement(insertSql);
 			database.execSQL("PRAGMA synchronous = OFF");
 			database.beginTransaction();
 			while ((line = reader.readLine()) != null) {
-				String[] splitted = line.split("::");
-				insertStatement.bindString(1, splitted[0].trim());
-				insertStatement.bindString(2, splitted[1].trim());
+				insertStatement.bindString(1, line.trim());
 				insertStatement.executeInsert();
 			}
 			database.setTransactionSuccessful();
@@ -111,7 +106,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 
 	public long getRowCount() {
 		SQLiteDatabase database = getReadableDatabase();
-		long count = DatabaseUtils.queryNumEntries(getReadableDatabase(), TABLE_FTS);
+		long count = DatabaseUtils.queryNumEntries(getReadableDatabase(), DICT_TABLE);
 		database.close();
 		return count;
 	}

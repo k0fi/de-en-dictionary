@@ -50,7 +50,7 @@
                     android:paddingStart="@dimen/activity_horizontal_margin">
 
                     <TextView
-                        android:id="@+id/dict_entry_frgn_main_term"
+                        android:id="@+id/dict_entry_en_main_term"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textSize="15sp"
@@ -91,7 +91,7 @@
                     android:paddingStart="@dimen/activity_horizontal_margin">
 
                     <TextView
-                        android:id="@+id/dict_entry_frgn_alt_term"
+                        android:id="@+id/dict_entry_en_alt_term"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"

@@ -8,15 +8,15 @@ import com.markodevcic.dictionary.R;
 
 final class DictViewHolder extends RecyclerView.ViewHolder {
 	final TextView deMainText;
-	final TextView frgnMainText;
+	final TextView enMainText;
 	final TextView deAltText;
-	final TextView frgnAltText;
+	final TextView enAltText;
 
 	public DictViewHolder(View itemView) {
 		super(itemView);
 		deMainText = (TextView) itemView.findViewById(R.id.dict_entry_de_main_term);
-		frgnMainText = (TextView) itemView.findViewById(R.id.dict_entry_frgn_main_term);
+		enMainText = (TextView) itemView.findViewById(R.id.dict_entry_en_main_term);
 		deAltText = (TextView) itemView.findViewById(R.id.dict_entry_de_alt_term);
-		frgnAltText = (TextView) itemView.findViewById(R.id.dict_entry_frgn_alt_term);
+		enAltText = (TextView) itemView.findViewById(R.id.dict_entry_en_alt_term);
 	}
 }
