@@ -20,7 +20,8 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	public static final String DICT_TABLE = "dict_table";
 	public static final String COL_ENTRY = "entry";
 
-	private static final String SEARCH_SQL = "SELECT * FROM " + DICT_TABLE + " WHERE " + DICT_TABLE + " MATCH ? ORDER BY MATCHINFO(" + DICT_TABLE + ", 'x')  DESC LIMIT 50 OFFSET 0";
+	private static final String SEARCH_SQL = "SELECT * FROM " + DICT_TABLE + " WHERE " +
+			DICT_TABLE + " MATCH ? ORDER BY MATCHINFO(" + DICT_TABLE + ", 'x')  DESC LIMIT 40 OFFSET 0";
 	private static final String DB_NAME = "dict_db";
 	private static final int DB_VERSION = 1;
 
@@ -46,7 +47,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			@Override
 			public void call(Subscriber<? super String> subscriber) {
 				SQLiteDatabase database = getReadableDatabase();
-				Cursor cursor = database.rawQuery(SEARCH_SQL, new String[]{query + "*"});
+				Cursor cursor = database.rawQuery(SEARCH_SQL, new String[]{query});
 				try {
 					if (cursor.moveToFirst() && !subscriber.isUnsubscribed()) {
 						do {
