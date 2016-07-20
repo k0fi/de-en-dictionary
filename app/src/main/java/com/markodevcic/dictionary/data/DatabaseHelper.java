@@ -21,7 +21,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	public static final String COL_ENTRY = "entry";
 
 	private static final String SEARCH_SQL = "SELECT * FROM " + DICT_TABLE + " WHERE " +
-			DICT_TABLE + " MATCH ? ORDER BY MATCHINFO(" + DICT_TABLE + ", 'x')  DESC LIMIT 40 OFFSET 0";
+			DICT_TABLE + " MATCH ? ORDER BY MATCHINFO(" + DICT_TABLE + ", 'x')  DESC LIMIT 60 OFFSET 0";
 	private static final String DB_NAME = "dict_db";
 	private static final int DB_VERSION = 1;
 
