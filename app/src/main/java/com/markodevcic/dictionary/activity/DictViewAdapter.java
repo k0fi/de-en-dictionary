@@ -48,16 +48,14 @@ final class DictViewAdapter extends RecyclerView.Adapter<DictViewHolder> {
 		return dictionaryEntries.size();
 	}
 
-	void addItem(DictionaryEntry dictionaryEntry) {
+	/*package*/ void addItem(DictionaryEntry dictionaryEntry) {
 		dictionaryEntries.add(dictionaryEntry);
 		notifyItemInserted(dictionaryEntries.size() - 1);
 	}
 
-	void clearItems() {
+	/*package*/ void clearItems() {
 		int size = dictionaryEntries.size();
-		for (int i = 0; i < size; i++) {
-			dictionaryEntries.clear();
-			notifyItemRangeRemoved(0, size);
-		}
+		dictionaryEntries.clear();
+		notifyItemRangeRemoved(0, size);
 	}
 }
