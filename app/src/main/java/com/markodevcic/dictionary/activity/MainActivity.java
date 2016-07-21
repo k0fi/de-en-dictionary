@@ -96,20 +96,24 @@ public class MainActivity extends AppCompatActivity
 			@Override
 			public boolean onQueryTextSubmit(final String term) {
 				searchSubject.onNext(term);
-				noResultsText.setVisibility(View.GONE);
 				return false;
 			}
 
 			@Override
 			public boolean onQueryTextChange(final String term) {
 				searchSubject.onNext(term);
-				noResultsText.setVisibility(View.GONE);
 				return false;
 			}
 		});
 
 		searchSubject.throttleWithTimeout(350, TimeUnit.MILLISECONDS)
 				.observeOn(AndroidSchedulers.mainThread())
+				.doOnNext(new Action1<String>() {
+					@Override
+					public void call(String s) {
+						noResultsText.setVisibility(View.GONE);
+					}
+				})
 				.subscribe(new Action1<String>() {
 					@Override
 					public void call(String term) {
