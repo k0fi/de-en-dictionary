@@ -3,7 +3,6 @@ package com.markodevcic.dictionary.activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,6 +33,7 @@ import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subscriptions.Subscriptions;
 
+@SuppressWarnings("ConstantConditions")
 public class MainActivity extends AppCompatActivity
 		implements Observer<List<DictionaryEntry>> {
 
@@ -42,7 +42,8 @@ public class MainActivity extends AppCompatActivity
 	private TranslationService translationService;
 	private DictViewAdapter dictViewAdapter;
 	private RecyclerView recyclerView;
-	private SearchView searchText;
+	private SearchView searchView;
+	private TextView noResultsText;
 	private ProgressBar progressBar;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
 	private LinearLayoutManager layoutManager;
@@ -65,6 +66,8 @@ public class MainActivity extends AppCompatActivity
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
+		noResultsText = (TextView) findViewById(R.id.text_no_results);
+		noResultsText.setVisibility(View.GONE);
 		recyclerView = (RecyclerView) findViewById(R.id.results_view);
 		recyclerView.setHasFixedSize(false);
 		layoutManager = new LinearLayoutManager(this);
@@ -86,19 +89,21 @@ public class MainActivity extends AppCompatActivity
 			}
 		});
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		searchText = (SearchView) findViewById(R.id.search_text);
-		searchText.setIconifiedByDefault(false);
-		searchText.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MainActivity.class)));
-		searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+		searchView = (SearchView) findViewById(R.id.search_text);
+		searchView.setIconifiedByDefault(false);
+		searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MainActivity.class)));
+		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(final String term) {
 				searchSubject.onNext(term);
+				noResultsText.setVisibility(View.GONE);
 				return false;
 			}
 
 			@Override
 			public boolean onQueryTextChange(final String term) {
 				searchSubject.onNext(term);
+				noResultsText.setVisibility(View.GONE);
 				return false;
 			}
 		});
@@ -124,6 +129,7 @@ public class MainActivity extends AppCompatActivity
 		dictViewAdapter.clearItems();
 		translationSubscription = translationService.startQuery(term)
 				.buffer(200, TimeUnit.MILLISECONDS)
+				.onBackpressureBuffer()
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(this);
@@ -137,17 +143,18 @@ public class MainActivity extends AppCompatActivity
 		isSearching = false;
 	}
 
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-			String query = intent.getStringExtra(SearchManager.QUERY);
-			searchText.setQuery(query, false);
-		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-			String query = intent.getDataString();
-			searchText.setQuery(query, false);
-		}
-	}
+	//disabled for now
+//	@Override
+//	protected void onNewIntent(Intent intent) {
+//		super.onNewIntent(intent);
+//		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+//			String query = intent.getStringExtra(SearchManager.QUERY);
+//			searchView.setQuery(query, false);
+//		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+//			String query = intent.getDataString();
+//			searchView.setQuery(query, false);
+//		}
+//	}
 
 	private void highlightVisibleItems() {
 		if (isSearching) {
@@ -193,7 +200,13 @@ public class MainActivity extends AppCompatActivity
 	public void onCompleted() {
 		progressBar.setVisibility(View.GONE);
 		isSearching = false;
-		progressBar.postDelayed(highlightRunnable, 200);
+		if (dictViewAdapter.getItemCount() > 0) {
+			progressBar.postDelayed(highlightRunnable, 200);
+		} else {
+			if (searchTerm.length() > 0) {
+				noResultsText.setVisibility(View.VISIBLE);
+			}
+		}
 	}
 
 	@Override

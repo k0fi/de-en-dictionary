@@ -3,4 +3,5 @@
     <string name="search_hint">just start typing …</string>
     <string name="search_label">Search</string>
     <string name="inital_loading">Please sit tight, loading dictionary data … this shouldn\'t take more than a minute and happens only once</string>
+    <string name="no_search_results">No results matching the search</string>
 </resources>
