@@ -29,11 +29,15 @@ import java.util.concurrent.TimeUnit;
 import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
+import rx.subjects.PublishSubject;
 import rx.subscriptions.Subscriptions;
 
 public class MainActivity extends AppCompatActivity
 		implements Observer<List<DictionaryEntry>> {
+
+	private final PublishSubject<String> searchSubject = PublishSubject.create();
 
 	private TranslationService translationService;
 	private DictViewAdapter dictViewAdapter;
@@ -42,7 +46,6 @@ public class MainActivity extends AppCompatActivity
 	private ProgressBar progressBar;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
 	private LinearLayoutManager layoutManager;
-
 	private boolean isSearching = false;
 	private String searchTerm = "";
 
@@ -60,7 +63,6 @@ public class MainActivity extends AppCompatActivity
 		dictViewAdapter = new DictViewAdapter();
 		setContentView(R.layout.activity_main);
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
-		progressBar.setVisibility(View.GONE);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
 		recyclerView = (RecyclerView) findViewById(R.id.results_view);
@@ -85,21 +87,30 @@ public class MainActivity extends AppCompatActivity
 		});
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		searchText = (SearchView) findViewById(R.id.search_text);
-		searchText.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MainActivity.class)));
 		searchText.setIconifiedByDefault(false);
+		searchText.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(this, MainActivity.class)));
 		searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(final String term) {
-				onSearch(term);
+				searchSubject.onNext(term);
 				return false;
 			}
 
 			@Override
 			public boolean onQueryTextChange(final String term) {
-				onSearch(term);
+				searchSubject.onNext(term);
 				return false;
 			}
 		});
+
+		searchSubject.throttleWithTimeout(350, TimeUnit.MILLISECONDS)
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(new Action1<String>() {
+					@Override
+					public void call(String term) {
+						onSearch(term);
+					}
+				});
 	}
 
 	private void onSearch(String term) {
@@ -117,6 +128,13 @@ public class MainActivity extends AppCompatActivity
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(this);
 		searchTerm = term.toLowerCase();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		progressBar.setVisibility(View.GONE);
+		isSearching = false;
 	}
 
 	@Override
