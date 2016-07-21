@@ -21,6 +21,7 @@ import com.markodevcic.dictionary.R;
 import com.markodevcic.dictionary.data.DatabaseHelper;
 import com.markodevcic.dictionary.translation.DictionaryEntry;
 import com.markodevcic.dictionary.translation.TranslationService;
+import com.markodevcic.dictionary.utils.SchedulersTransformer;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,6 @@ import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import rx.subjects.PublishSubject;
 import rx.subscriptions.Subscriptions;
 
@@ -49,13 +49,13 @@ public class MainActivity extends AppCompatActivity
 	private LinearLayoutManager layoutManager;
 	private boolean isSearching = false;
 	private String searchTerm = "";
-
 	private final Runnable highlightRunnable = new Runnable() {
 		@Override
 		public void run() {
 			highlightVisibleItems();
 		}
 	};
+	private SchedulersTransformer<List<DictionaryEntry>> schedulersTransformer = new SchedulersTransformer<>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity
 			}
 		});
 
-		searchSubject.throttleWithTimeout(350, TimeUnit.MILLISECONDS)
+		searchSubject.throttleWithTimeout(400, TimeUnit.MILLISECONDS)
 				.observeOn(AndroidSchedulers.mainThread())
 				.doOnNext(new Action1<String>() {
 					@Override
@@ -134,8 +134,7 @@ public class MainActivity extends AppCompatActivity
 		translationSubscription = translationService.startQuery(term)
 				.buffer(200, TimeUnit.MILLISECONDS)
 				.onBackpressureBuffer()
-				.subscribeOn(Schedulers.io())
-				.observeOn(AndroidSchedulers.mainThread())
+				.compose(schedulersTransformer)
 				.subscribe(this);
 		searchTerm = term.toLowerCase();
 	}
