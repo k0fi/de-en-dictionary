@@ -6,11 +6,11 @@ import android.widget.TextView;
 
 import com.markodevcic.dictionary.R;
 
-final class DictViewHolder extends RecyclerView.ViewHolder {
-	final TextView deMainText;
-	final TextView enMainText;
-	final TextView deAltText;
-	final TextView enAltText;
+/*package*/ final class DictViewHolder extends RecyclerView.ViewHolder {
+	/*package*/	final TextView deMainText;
+	/*package*/ final TextView enMainText;
+	/*package*/ final TextView deAltText;
+	/*package*/ final TextView enAltText;
 
 	public DictViewHolder(View itemView) {
 		super(itemView);

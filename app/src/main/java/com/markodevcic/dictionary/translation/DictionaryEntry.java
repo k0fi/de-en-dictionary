@@ -4,17 +4,17 @@ public final class DictionaryEntry {
 
 	private final String deMainTerm;
 	private final String[] deAltTerms;
-	private final String frgnMainTerm;
-	private final String[] frgnAltTerms;
+	private final String enMainTerm;
+	private final String[] enAltTerms;
 
 	public DictionaryEntry(String deMainTerm,
 							String[] deAltTerms,
-							String frgnMainTerm,
-							String[] frgnAltTerms) {
+							String enMainTerm,
+							String[] enAltTerms) {
 		this.deMainTerm = deMainTerm;
 		this.deAltTerms = deAltTerms;
-		this.frgnMainTerm = frgnMainTerm;
-		this.frgnAltTerms = frgnAltTerms;
+		this.enMainTerm = enMainTerm;
+		this.enAltTerms = enAltTerms;
 	}
 
 	public String getDeMainTerm() {
@@ -25,11 +25,11 @@ public final class DictionaryEntry {
 		return deAltTerms;
 	}
 
-	public String getFrgnMainTerm() {
-		return frgnMainTerm;
+	public String getEnMainTerm() {
+		return enMainTerm;
 	}
 
-	public String[] getFrgnAltTerms() {
-		return frgnAltTerms;
+	public String[] getEnAltTerms() {
+		return enAltTerms;
 	}
 }

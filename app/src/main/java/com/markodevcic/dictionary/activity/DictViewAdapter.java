@@ -12,7 +12,7 @@ import com.markodevcic.dictionary.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-final class DictViewAdapter extends RecyclerView.Adapter<DictViewHolder> {
+/*package*/ final class DictViewAdapter extends RecyclerView.Adapter<DictViewHolder> {
 
 	private final List<DictionaryEntry> dictionaryEntries = new ArrayList<>();
 
@@ -26,7 +26,7 @@ final class DictViewAdapter extends RecyclerView.Adapter<DictViewHolder> {
 	public void onBindViewHolder(DictViewHolder holder, int position) {
 		DictionaryEntry dictionaryEntry = dictionaryEntries.get(position);
 		holder.deMainText.setText(dictionaryEntry.getDeMainTerm());
-		holder.enMainText.setText(dictionaryEntry.getFrgnMainTerm());
+		holder.enMainText.setText(dictionaryEntry.getEnMainTerm());
 		String[] deAltTerms = dictionaryEntry.getDeAltTerms();
 		if (deAltTerms != null) {
 			holder.deAltText.setVisibility(View.VISIBLE);
@@ -34,7 +34,7 @@ final class DictViewAdapter extends RecyclerView.Adapter<DictViewHolder> {
 		} else {
 			holder.deAltText.setVisibility(View.GONE);
 		}
-		String[] frgnAltTerms = dictionaryEntry.getFrgnAltTerms();
+		String[] frgnAltTerms = dictionaryEntry.getEnAltTerms();
 		if (frgnAltTerms != null) {
 			holder.enAltText.setVisibility(View.VISIBLE);
 			holder.enAltText.setText(StringUtils.join(frgnAltTerms, "\n").trim());
