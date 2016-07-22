@@ -11,7 +11,11 @@ import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.transition.Fade;
+import android.transition.Transition;
+import android.transition.TransitionManager;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -43,6 +47,7 @@ public class MainActivity extends AppCompatActivity
 	private DictViewAdapter dictViewAdapter;
 	private RecyclerView recyclerView;
 	private SearchView searchView;
+	private LinearLayout viewHost;
 	private TextView noResultsText;
 	private ProgressBar progressBar;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
@@ -56,13 +61,18 @@ public class MainActivity extends AppCompatActivity
 		}
 	};
 	private SchedulersTransformer<List<DictionaryEntry>> schedulersTransformer = new SchedulersTransformer<>();
+	private Transition transition;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		transition = new Fade();
+		transition.setDuration(500);
+		getWindow().setEnterTransition(transition);
+		viewHost = (LinearLayout) findViewById(R.id.main_view_host);
 		translationService = new TranslationService(new DatabaseHelper(this));
 		dictViewAdapter = new DictViewAdapter();
-		setContentView(R.layout.activity_main);
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -123,6 +133,7 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	private void onSearch(String term) {
+		TransitionManager.beginDelayedTransition(viewHost, transition);
 		progressBar.setVisibility(View.VISIBLE);
 		isSearching = true;
 		startSearch(term);
@@ -201,6 +212,7 @@ public class MainActivity extends AppCompatActivity
 
 	@Override
 	public void onCompleted() {
+		TransitionManager.beginDelayedTransition(viewHost, transition);
 		progressBar.setVisibility(View.GONE);
 		isSearching = false;
 		if (dictViewAdapter.getItemCount() > 0) {
