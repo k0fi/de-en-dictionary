@@ -3,6 +3,7 @@ package com.markodevcic.dictionary.activity;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -157,18 +158,17 @@ public class MainActivity extends AppCompatActivity
 		isSearching = false;
 	}
 
-	//disabled for now
-//	@Override
-//	protected void onNewIntent(Intent intent) {
-//		super.onNewIntent(intent);
-//		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-//			String query = intent.getStringExtra(SearchManager.QUERY);
-//			searchView.setQuery(query, false);
-//		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
-//			String query = intent.getDataString();
-//			searchView.setQuery(query, false);
-//		}
-//	}
+c	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+			String query = intent.getStringExtra(SearchManager.QUERY);
+			searchView.setQuery(query, false);
+		} else if (Intent.ACTION_VIEW.equals(intent.getAction())) {
+			String query = intent.getDataString();
+			searchView.setQuery(query, false);
+		}
+	}
 
 	private void highlightVisibleItems() {
 		if (isSearching) {
