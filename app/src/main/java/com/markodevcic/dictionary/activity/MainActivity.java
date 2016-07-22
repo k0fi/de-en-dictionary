@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity
 		isSearching = false;
 	}
 
-c	@Override
+	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
