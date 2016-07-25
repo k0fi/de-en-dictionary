@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="search_hint">Tippen Sie ein…</string>
+    <string name="search_label">Suche</string>
+    <string name="inital_loading">Bitte warten Sie einen kurzen Augenblick, die Wörterbuchdaten werden einmalig geladen</string>
+    <string name="no_search_results">Es konnte kein Suchergebnis gefunden werden</string>
+</resources>
