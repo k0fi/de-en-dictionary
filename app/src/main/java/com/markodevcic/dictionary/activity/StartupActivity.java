@@ -2,18 +2,15 @@ package com.markodevcic.dictionary.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.markodevcic.dictionary.R;
 import com.markodevcic.dictionary.data.DatabaseHelper;
-import com.markodevcic.dictionary.utils.SchedulersTransformer;
+import com.markodevcic.dictionary.utils.IOSchedulersTransformer;
 
 import rx.Observer;
 import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 import rx.subscriptions.Subscriptions;
 
 public class StartupActivity extends AppCompatActivity {
@@ -31,7 +28,7 @@ public class StartupActivity extends AppCompatActivity {
 		} else {
 			setContentView(R.layout.activity_startup);
 			loadSubscription = databaseHelper.startLoadDictionary()
-					.compose(new SchedulersTransformer<Void>())
+					.compose(new IOSchedulersTransformer<Void>())
 					.subscribe(new Observer<Void>() {
 						@Override
 						public void onCompleted() {

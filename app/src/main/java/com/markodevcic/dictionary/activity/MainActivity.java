@@ -26,7 +26,7 @@ import com.markodevcic.dictionary.R;
 import com.markodevcic.dictionary.data.DatabaseHelper;
 import com.markodevcic.dictionary.translation.DictionaryEntry;
 import com.markodevcic.dictionary.translation.TranslationService;
-import com.markodevcic.dictionary.utils.SchedulersTransformer;
+import com.markodevcic.dictionary.utils.IOSchedulersTransformer;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
 			highlightVisibleItems();
 		}
 	};
-	private SchedulersTransformer<List<DictionaryEntry>> schedulersTransformer = new SchedulersTransformer<>();
+	private IOSchedulersTransformer<List<DictionaryEntry>> IOSchedulersTransformer = new IOSchedulersTransformer<>();
 	private Transition transition;
 
 	@Override
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity
 		translationSubscription = translationService.startQuery(term)
 				.buffer(200, TimeUnit.MILLISECONDS)
 				.onBackpressureBuffer()
-				.compose(schedulersTransformer)
+				.compose(IOSchedulersTransformer)
 				.subscribe(this);
 		searchTerm = term.toLowerCase();
 	}
