@@ -2,11 +2,13 @@ package com.markodevcic.dictionary.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
 import com.markodevcic.dictionary.R;
 import com.markodevcic.dictionary.data.DatabaseHelper;
+import com.markodevcic.dictionary.utils.SchedulersTransformer;
 
 import rx.Observer;
 import rx.Subscription;
@@ -29,8 +31,7 @@ public class StartupActivity extends AppCompatActivity {
 		} else {
 			setContentView(R.layout.activity_startup);
 			loadSubscription = databaseHelper.startLoadDictionary()
-					.subscribeOn(Schedulers.io())
-					.observeOn(AndroidSchedulers.mainThread())
+					.compose(new SchedulersTransformer<Void>())
 					.subscribe(new Observer<Void>() {
 						@Override
 						public void onCompleted() {
@@ -39,13 +40,11 @@ public class StartupActivity extends AppCompatActivity {
 
 						@Override
 						public void onError(Throwable e) {
-
 							Toast.makeText(StartupActivity.this, "Error while loading data", Toast.LENGTH_LONG).show();
 						}
 
 						@Override
 						public void onNext(Void voids) {
-
 						}
 					});
 		}
