@@ -134,7 +134,6 @@ public class MainActivity extends AppCompatActivity
 	}
 
 	private void onSearch(String term) {
-		TransitionManager.beginDelayedTransition(viewHost, transition);
 		progressBar.setVisibility(View.VISIBLE);
 		isSearching = true;
 		startSearch(term);
@@ -212,7 +211,6 @@ public class MainActivity extends AppCompatActivity
 
 	@Override
 	public void onCompleted() {
-		TransitionManager.beginDelayedTransition(viewHost, transition);
 		progressBar.setVisibility(View.GONE);
 		isSearching = false;
 		if (dictViewAdapter.getItemCount() > 0) {
