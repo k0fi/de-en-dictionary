@@ -48,7 +48,6 @@ public class MainActivity extends AppCompatActivity
 	private DictViewAdapter dictViewAdapter;
 	private RecyclerView recyclerView;
 	private SearchView searchView;
-	private LinearLayout viewHost;
 	private TextView noResultsText;
 	private ProgressBar progressBar;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
@@ -71,7 +70,6 @@ public class MainActivity extends AppCompatActivity
 		transition = new Fade();
 		transition.setDuration(500);
 		getWindow().setEnterTransition(transition);
-		viewHost = (LinearLayout) findViewById(R.id.main_view_host);
 		translationService = new TranslationService(new DatabaseHelper(this));
 		dictViewAdapter = new DictViewAdapter();
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
