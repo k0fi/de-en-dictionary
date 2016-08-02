@@ -61,15 +61,11 @@ public class MainActivity extends AppCompatActivity
 		}
 	};
 	private IOSchedulersTransformer<List<DictionaryEntry>> IOSchedulersTransformer = new IOSchedulersTransformer<>();
-	private Transition transition;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		transition = new Fade();
-		transition.setDuration(500);
-		getWindow().setEnterTransition(transition);
 		translationService = new TranslationService(new DatabaseHelper(this));
 		dictViewAdapter = new DictViewAdapter();
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
