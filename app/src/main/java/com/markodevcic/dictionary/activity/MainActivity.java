@@ -12,11 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.transition.Fade;
-import android.transition.Transition;
-import android.transition.TransitionManager;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -31,6 +27,7 @@ import com.markodevcic.dictionary.utils.IOSchedulersTransformer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import rx.Observable;
 import rx.Observer;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
@@ -60,7 +57,7 @@ public class MainActivity extends AppCompatActivity
 			highlightVisibleItems();
 		}
 	};
-	private IOSchedulersTransformer<List<DictionaryEntry>> IOSchedulersTransformer = new IOSchedulersTransformer<>();
+	private final Observable.Transformer IOSchedulersTransformer = new IOSchedulersTransformer<>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
