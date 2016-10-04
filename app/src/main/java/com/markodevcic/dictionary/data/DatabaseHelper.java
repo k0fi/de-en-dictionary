@@ -62,7 +62,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 					if (!subscriber.isUnsubscribed()) {
 						subscriber.onError(e);
 					}
-				}finally {
+				} finally {
 					database.close();
 					cursor.close();
 				}

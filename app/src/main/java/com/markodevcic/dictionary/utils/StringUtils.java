@@ -5,6 +5,10 @@ import android.support.annotation.NonNull;
 public final class StringUtils {
 	private static final StringBuilder stringBuilder = new StringBuilder();
 
+	private StringUtils() {
+		throw new IllegalStateException("no instnaces");
+	}
+
 	public static String join(@NonNull String[] strings, @NonNull String join) {
 		int index = 1;
 		for (String string : strings) {
