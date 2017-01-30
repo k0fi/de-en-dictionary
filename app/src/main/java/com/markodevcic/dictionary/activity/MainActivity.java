@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,6 +14,9 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
@@ -47,10 +51,12 @@ public class MainActivity extends AppCompatActivity
 	private SearchView searchView;
 	private TextView noResultsText;
 	private ProgressBar progressBar;
+	private ViewGroup buttonsHost;
 	private Subscription translationSubscription = Subscriptions.unsubscribed();
 	private LinearLayoutManager layoutManager;
 	private boolean isSearching = false;
 	private String searchTerm = "";
+	private boolean isOpened;
 	private final Runnable highlightRunnable = new Runnable() {
 		@Override
 		public void run() {
@@ -67,6 +73,7 @@ public class MainActivity extends AppCompatActivity
 		dictViewAdapter = new DictViewAdapter();
 		progressBar = (ProgressBar) findViewById(R.id.progressBar);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+		buttonsHost = (ViewGroup) findViewById(R.id.buttons_host);
 		setSupportActionBar(toolbar);
 		noResultsText = (TextView) findViewById(R.id.text_no_results);
 		noResultsText.setVisibility(View.GONE);
@@ -122,6 +129,42 @@ public class MainActivity extends AppCompatActivity
 						onSearch(term);
 					}
 				});
+
+		final View view = findViewById(R.id.main_view_host);
+		view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				Rect r = new Rect();
+				view.getWindowVisibleDisplayFrame(r);
+				if (view.getRootView().getHeight() - (r.bottom - r.top) > 500) {
+					onKeyboardShown();
+				} else {
+					onKeyboardHidden();
+				}
+			}
+		});
+
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_sharf_s));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_e));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_a));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_u));
+	}
+
+	private void onKeyboardHidden() {
+		buttonsHost.setVisibility(View.GONE);
+	}
+
+	private void onKeyboardShown() {
+		buttonsHost.setVisibility(View.VISIBLE);
+	}
+
+	private void setGermanButtonClickListener(final Button btn) {
+		btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				searchView.setQuery(searchView.getQuery().toString() + btn.getText().toString(), false);
+			}
+		});
 	}
 
 	private void onSearch(String term) {
