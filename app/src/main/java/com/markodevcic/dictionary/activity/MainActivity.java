@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity
 		if (dictViewAdapter.getItemCount() > 0) {
 			progressBar.postDelayed(highlightRunnable, 200);
 		} else {
-			if (searchTerm.length() > 0) {
+			if (!searchTerm.isEmpty()) {
 				noResultsText.setVisibility(View.VISIBLE);
 			}
 		}
