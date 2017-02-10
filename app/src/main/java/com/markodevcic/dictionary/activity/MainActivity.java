@@ -152,9 +152,17 @@ public class MainActivity extends AppCompatActivity
 
 	private void onKeyboardHidden() {
 		buttonsHost.setVisibility(View.GONE);
+		buttonsHost.setAlpha(0);
+		buttonsHost.setScaleX(0);
+		buttonsHost.setScaleY(0);
 	}
 
 	private void onKeyboardShown() {
+		buttonsHost.animate()
+				.setStartDelay(150)
+				.alpha(1)
+				.scaleY(1)
+				.scaleX(1);
 		buttonsHost.setVisibility(View.VISIBLE);
 	}
 
