@@ -6,7 +6,7 @@ public final class StringUtils {
 	private static final StringBuilder stringBuilder = new StringBuilder();
 
 	private StringUtils() {
-		throw new IllegalStateException("no instnaces");
+		throw new IllegalStateException("no instances");
 	}
 
 	public static String join(@NonNull String[] strings, @NonNull String join) {
