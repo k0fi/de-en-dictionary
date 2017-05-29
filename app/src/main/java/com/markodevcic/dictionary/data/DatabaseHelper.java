@@ -106,9 +106,14 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	}
 
 	public long getRowCount() {
-		SQLiteDatabase database = getReadableDatabase();
-		long count = DatabaseUtils.queryNumEntries(getReadableDatabase(), DICT_TABLE);
-		database.close();
-		return count;
+		SQLiteDatabase database = null;
+		try {
+			database = getReadableDatabase();
+			return DatabaseUtils.queryNumEntries(database, DICT_TABLE);
+		} finally {
+			if (database != null) {
+				database.close();
+			}
+		}
 	}
 }
