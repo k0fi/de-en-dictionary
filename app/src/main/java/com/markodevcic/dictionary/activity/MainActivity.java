@@ -153,20 +153,36 @@ public class MainActivity extends AppCompatActivity
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(final String term) {
-				searchSubject.onNext(term);
+				if (term.isEmpty()) {
+					onTextClear();
+				} else {
+					searchSubject.onNext(term);
+				}
 				return false;
 			}
 
 			@Override
 			public boolean onQueryTextChange(final String term) {
-				searchSubject.onNext(term);
+				if (term.isEmpty()) {
+					onTextClear();
+				} else {
+					searchSubject.onNext(term);
+				}
 				return false;
 			}
 		});
 	}
 	
+	private void onTextClear() {
+		progressBar.setVisibility(View.GONE);
+		translationSubscription.unsubscribe();
+		dictViewAdapter.clearItems();
+		searchTerm = "";
+		isSearching = false;
+	}
+	
 	private void setupSearchSubject() {
-		searchSubject.throttleWithTimeout(400, TimeUnit.MILLISECONDS)
+		searchSubject.throttleWithTimeout(500, TimeUnit.MILLISECONDS)
 				.observeOn(AndroidSchedulers.mainThread())
 				.doOnNext(new Action1<String>() {
 					@Override
@@ -182,22 +198,6 @@ public class MainActivity extends AppCompatActivity
 				});
 	}
 	
-	private void setupGermanClickListeners() {
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_sharf_s));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_e));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_a));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_u));
-	}
-	
-	private void setGermanButtonClickListener(final Button btn) {
-		btn.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				searchView.setQuery(searchView.getQuery().toString() + btn.getText().toString(), false);
-			}
-		});
-	}
-
 	private void onSearch(String term) {
 		progressBar.setVisibility(View.VISIBLE);
 		isSearching = true;
@@ -213,6 +213,22 @@ public class MainActivity extends AppCompatActivity
 		
 		searchTerm = term.toLowerCase();
 	}
+	
+	private void setupGermanClickListeners() {
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_sharf_s));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_e));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_a));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_u));
+	}
+
+	private void setGermanButtonClickListener(final Button btn) {
+		btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				searchView.setQuery(searchView.getQuery().toString() + btn.getText().toString(), false);
+			}
+		});
+	}
 
 	@Override
 	protected void onResume() {
@@ -224,6 +240,7 @@ public class MainActivity extends AppCompatActivity
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
+		
 		if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
 			String query = intent.getStringExtra(SearchManager.QUERY);
 			searchView.setQuery(query, false);
@@ -237,6 +254,7 @@ public class MainActivity extends AppCompatActivity
 		if (isSearching) {
 			return;
 		}
+		
 		int firstPosition = layoutManager.findFirstVisibleItemPosition();
 		int lastPosition = layoutManager.findLastVisibleItemPosition() + 1;
 		for (int i = firstPosition; i < lastPosition; i++) {
@@ -264,6 +282,7 @@ public class MainActivity extends AppCompatActivity
 					index, index + searchTerm.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			index = term.indexOf(searchTerm, searchTerm.length() + index);
 		}
+		
 		textView.setText(spannable);
 	}
 
