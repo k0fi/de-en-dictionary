@@ -44,7 +44,14 @@ public class MainActivity extends AppCompatActivity
 		implements Observer<List<DictionaryEntry>> {
 
 	private final PublishSubject<String> searchSubject = PublishSubject.create();
-
+	private final Runnable highlightRunnable = new Runnable() {
+		@Override
+		public void run() {
+			highlightVisibleItems();
+		}
+	};
+	private final Observable.Transformer IOSchedulersTransformer = new IOSchedulersTransformer<>();
+	
 	private TranslationService translationService;
 	private DictViewAdapter dictViewAdapter;
 	private RecyclerView recyclerView;
@@ -56,27 +63,38 @@ public class MainActivity extends AppCompatActivity
 	private LinearLayoutManager layoutManager;
 	private boolean isSearching = false;
 	private String searchTerm = "";
-	private boolean isOpened;
-	private final Runnable highlightRunnable = new Runnable() {
-		@Override
-		public void run() {
-			highlightVisibleItems();
-		}
-	};
-	private final Observable.Transformer IOSchedulersTransformer = new IOSchedulersTransformer<>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
 		translationService = new TranslationService(new DatabaseHelper(this));
 		dictViewAdapter = new DictViewAdapter();
-		progressBar = (ProgressBar) findViewById(R.id.progressBar);
+		
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-		buttonsHost = (ViewGroup) findViewById(R.id.buttons_host);
 		setSupportActionBar(toolbar);
+		
+		setupViews();
+		setupRecyclerView();
+		setupSearchView();
+		setupSearchSubject();
+		setupViewTreeObserver();
+
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_sharf_s));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_e));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_a));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_u));
+	}
+	
+	private void setupViews() {
+		progressBar = (ProgressBar) findViewById(R.id.progressBar);
+		buttonsHost = (ViewGroup) findViewById(R.id.buttons_host);
 		noResultsText = (TextView) findViewById(R.id.text_no_results);
 		noResultsText.setVisibility(View.GONE);
+	}
+	
+	private void setupRecyclerView() {
 		recyclerView = (RecyclerView) findViewById(R.id.results_view);
 		recyclerView.setHasFixedSize(false);
 		layoutManager = new LinearLayoutManager(this);
@@ -97,6 +115,41 @@ public class MainActivity extends AppCompatActivity
 
 			}
 		});
+	}
+	
+	private void setupViewTreeObserver() {
+		final View view = findViewById(R.id.main_view_host);
+		view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+			@Override
+			public void onGlobalLayout() {
+				Rect r = new Rect();
+				view.getWindowVisibleDisplayFrame(r);
+				if (view.getRootView().getHeight() - (r.bottom - r.top) > 500) {
+					onKeyboardShown();
+				} else {
+					onKeyboardHidden();
+				}
+			}
+		});
+	}
+	
+	private void onKeyboardShown() {
+		buttonsHost.animate()
+				.setStartDelay(150)
+				.alpha(1)
+				.scaleY(1)
+				.scaleX(1);
+		buttonsHost.setVisibility(View.VISIBLE);
+	}
+	
+	private void onKeyboardHidden() {
+		buttonsHost.setVisibility(View.GONE);
+		buttonsHost.setAlpha(0);
+		buttonsHost.setScaleX(0);
+		buttonsHost.setScaleY(0);
+	}
+	
+	private void setupSearchView() {
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 		searchView = (SearchView) findViewById(R.id.search_text);
 		searchView.setIconifiedByDefault(false);
@@ -114,7 +167,9 @@ public class MainActivity extends AppCompatActivity
 				return false;
 			}
 		});
+	}
 
+	private void setupSearchSubject() {
 		searchSubject.throttleWithTimeout(400, TimeUnit.MILLISECONDS)
 				.observeOn(AndroidSchedulers.mainThread())
 				.doOnNext(new Action1<String>() {
@@ -129,41 +184,6 @@ public class MainActivity extends AppCompatActivity
 						onSearch(term);
 					}
 				});
-
-		final View view = findViewById(R.id.main_view_host);
-		view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-			@Override
-			public void onGlobalLayout() {
-				Rect r = new Rect();
-				view.getWindowVisibleDisplayFrame(r);
-				if (view.getRootView().getHeight() - (r.bottom - r.top) > 500) {
-					onKeyboardShown();
-				} else {
-					onKeyboardHidden();
-				}
-			}
-		});
-
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_sharf_s));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_e));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_a));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_u));
-	}
-
-	private void onKeyboardHidden() {
-		buttonsHost.setVisibility(View.GONE);
-		buttonsHost.setAlpha(0);
-		buttonsHost.setScaleX(0);
-		buttonsHost.setScaleY(0);
-	}
-
-	private void onKeyboardShown() {
-		buttonsHost.animate()
-				.setStartDelay(150)
-				.alpha(1)
-				.scaleY(1)
-				.scaleX(1);
-		buttonsHost.setVisibility(View.VISIBLE);
 	}
 
 	private void setGermanButtonClickListener(final Button btn) {
