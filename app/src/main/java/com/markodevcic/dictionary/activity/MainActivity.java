@@ -80,11 +80,7 @@ public class MainActivity extends AppCompatActivity
 		setupSearchView();
 		setupSearchSubject();
 		setupViewTreeObserver();
-
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_sharf_s));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_e));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_a));
-		setGermanButtonClickListener((Button)findViewById(R.id.btn_u));
+		setupGermanClickListeners();
 	}
 	
 	private void setupViews() {
@@ -168,7 +164,7 @@ public class MainActivity extends AppCompatActivity
 			}
 		});
 	}
-
+	
 	private void setupSearchSubject() {
 		searchSubject.throttleWithTimeout(400, TimeUnit.MILLISECONDS)
 				.observeOn(AndroidSchedulers.mainThread())
@@ -185,7 +181,14 @@ public class MainActivity extends AppCompatActivity
 					}
 				});
 	}
-
+	
+	private void setupGermanClickListeners() {
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_sharf_s));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_e));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_a));
+		setGermanButtonClickListener((Button)findViewById(R.id.btn_u));
+	}
+	
 	private void setGermanButtonClickListener(final Button btn) {
 		btn.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -198,17 +201,16 @@ public class MainActivity extends AppCompatActivity
 	private void onSearch(String term) {
 		progressBar.setVisibility(View.VISIBLE);
 		isSearching = true;
-		startSearch(term);
-	}
-
-	private void startSearch(final String term) {
+		
 		translationSubscription.unsubscribe();
 		dictViewAdapter.clearItems();
+		
 		translationSubscription = translationService.startQuery(term)
 				.buffer(200, TimeUnit.MILLISECONDS)
 				.onBackpressureBuffer()
 				.compose(IOSchedulersTransformer)
 				.subscribe(this);
+		
 		searchTerm = term.toLowerCase();
 	}
 
